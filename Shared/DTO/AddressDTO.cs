@@ -1,4 +1,4 @@
-﻿namespace ZAI.Server.DTO;
+﻿namespace ZAI.Shared;
 public class AddressDTO
 {
     public string ZipCode { get; set; }

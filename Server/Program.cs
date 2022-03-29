@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
+using ZAI.Server.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<ZAIDbContext>(options => options.UseSqlServer(builder.Configuration["ConnectionStrings:SqlServer"])); 
 
 var app = builder.Build();
 
@@ -13,6 +16,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
+    });
 }
 else
 {
@@ -32,5 +41,7 @@ app.UseRouting();
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+
+var database = app.Services.CreateScope().ServiceProvider.GetService<ZAIDbContext>().Database.EnsureCreated();
 
 app.Run();
