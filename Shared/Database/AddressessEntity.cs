@@ -1,6 +1,5 @@
-﻿using ZAI.Shared;
+﻿namespace ZAI.Shared.Database;
 
-namespace ZAI.Server.Database;
 public class AddressessEntity
 {
     public int Id { get; set; }

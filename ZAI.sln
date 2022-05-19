@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZAI.Server", "Server\ZAI.Server.csproj", "{F8174CCE-173A-43AB-9B3B-74199792BA8D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZAI.Server", "Server\ZAI.Server.csproj", "{F8174CCE-173A-43AB-9B3B-74199792BA8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZAI.Client", "Client\ZAI.Client.csproj", "{1993887A-D87D-4E77-BA63-4B585FDA1477}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZAI.Client", "Client\ZAI.Client.csproj", "{1993887A-D87D-4E77-BA63-4B585FDA1477}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZAI.Shared", "Shared\ZAI.Shared.csproj", "{C8A0514A-26BF-4F67-A75E-5DD7B46B1D6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZAI.Shared", "Shared\ZAI.Shared.csproj", "{C8A0514A-26BF-4F67-A75E-5DD7B46B1D6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

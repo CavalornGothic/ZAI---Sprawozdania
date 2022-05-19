@@ -1,0 +1,13 @@
+﻿@inject ILocalStorageService _localStorage
+<button @onclick="LogoutUser">Logout</button>
+
+@code {
+    [Parameter]
+    public EventCallback<bool> OnSuccess { get; set; }
+    private async Task LogoutUser()
+    {
+        await _localStorage.RemoveItemAsync("accessToken");
+        await _localStorage.RemoveItemAsync("refreshToken");
+        await OnSuccess.InvokeAsync(true);
+    }
+}

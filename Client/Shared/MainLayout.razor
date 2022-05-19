@@ -1,4 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using ZAI.Shared.Database
+@inherits LayoutComponentBase
+@inject ILocalStorageService _localStorage
+@inject HttpClient _http;
+
 
 <div class="page">
     <div class="sidebar">
@@ -6,12 +10,40 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
+        @if(User != null)
+        {
+             <div class="top-row px-4">
+                 <b>Cześć, @User.Login!</b>
+            </div>
+        }
+        else
+        {
+             <div class="top-row px-4">
+                 <b>Zaloguj się</b>
+            </div>
+        }
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
+
+@code{
+    public User? User { get; set; } = null;
+    public string? exc { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        string? accessToken = await _localStorage.GetItemAsync<string?>("accessToken");
+        if(!String.IsNullOrEmpty(accessToken))
+        {
+            try
+            {
+                User = await _http.GetFromJsonAsync<User?>($"api/user/user/token/{accessToken}");
+            }
+            catch(Exception ex)
+            {
+                exc = ex.Message;
+            }
+        }
+    }
+}

@@ -1,0 +1,91 @@
+﻿@page "/signin"
+@using System.Text.Json
+@using ZAI.Shared.DTO
+@inject HttpClient Http
+@inject ILocalStorageService _localStorage
+@inject NavigationManager _navigationManager
+
+<PageTitle>SignIn</PageTitle>
+
+@if(errors)
+{
+    <p>
+        <h4>Error:</h4>
+        @foreach(var error in errorMessage)
+        {
+            <h6>@error</h6>
+        }
+    </p>
+}
+<label>UserName</label>
+<input type="text" @bind-value="username" placeholder="your username" />
+<label>Password</label>
+<input type="password" @bind-value="password" placeholder="password"/>
+<button @onclick="AcceptForm">SignIn</button>
+
+@code {
+    [Parameter] public string? ReturnURL { get; set; } = null;
+    [Parameter] public EventCallback<bool> OnSuccess { get; set; }
+    private bool errors { get; set; } = false;
+    private List<string> errorMessage { get; set; }
+    private string username { get; set; } = "";
+    private string password { get; set; } = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        errorMessage = new List<string>();
+    }
+
+    private async Task AcceptForm()
+    {
+        if(String.IsNullOrEmpty(username))
+        {
+            errors = true;
+            errorMessage.Add("Type your username");
+        }
+        else
+        {
+            errors = false;
+            errorMessage.Clear();
+        }
+
+        if(String.IsNullOrEmpty(password))
+        {
+            errors = true;
+            errorMessage.Add("Type your password");
+        }
+        else
+        {
+            errors = false;
+            errorMessage.Clear();
+        }
+
+        if(!errors)
+        {
+            var response = await Http.PostAsJsonAsync("api/auth/signin", new SignInRequestDTO{ Login = @username, Password = @password });
+            var json = await response.Content.ReadAsStreamAsync();
+            var options = new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+            var jsonRes = await JsonSerializer.DeserializeAsync<SignInResponseDTO>(json, options);
+            if(jsonRes.Message != null)
+            {
+                errorMessage.Add(jsonRes.Message);
+                errors = true;
+            }
+            else
+            {
+                errors = false;
+                errorMessage.Clear();
+                await _localStorage.SetItemAsync("accessToken", jsonRes.AccessToken);
+                await _localStorage.SetItemAsync("refreshToken", jsonRes.RefreshToken);
+                await OnSuccess.InvokeAsync(true);
+                //if(ReturnURL == null)
+                //    _navigationManager.NavigateTo("/");
+                //else
+                //    _navigationManager.NavigateTo(ReturnURL);
+            }
+        }
+    }
+}

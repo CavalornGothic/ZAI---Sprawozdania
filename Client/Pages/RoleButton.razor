@@ -1,0 +1,97 @@
+﻿@page "/role"
+@inject HttpClient _http
+@inject ILocalStorageService _localStorage
+
+@if(User == null)
+{
+    <SignIn OnSuccess="OnSuccessSignIn" />
+}
+else
+{
+    @foreach(var role in @UserExpensiveData.RoleUsers)
+    {
+        @if(@role.Role.Name == "User")
+        {
+            <input type="text" placeholder="jesteś User" />
+        }
+        else if(@role.Role.Name == "Administrator")
+        {
+            <input type="text" placeholder="jesteś Administrator" />
+        }
+    }
+    <div>
+        <button>@Label</button>
+    </div>
+    <div>
+        <button>@Label2</button>
+    </div>
+    <ZAI.Client.Components.Logout OnSuccess="OnSuccessLogout" />
+}
+
+
+@code {
+    public User? User { get; set; } = null;
+    public User? UserExpensiveData { get; set; } = null;
+    public string? exc { get; set; }
+    public string Label { get; set; } = "Brak uprawnień";
+    public string Label2 { get; set; } = "Brak uprawnień";
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBaseData();
+    }
+
+    private async Task LoadBaseData()
+    {
+        string? accessToken = await _localStorage.GetItemAsync<string?>("accessToken");
+        if(!String.IsNullOrEmpty(accessToken))
+        {
+            try
+            {
+                User = await _http.GetFromJsonAsync<User?>($"api/user/user/token/{accessToken}");
+                UserExpensiveData = await _http.GetFromJsonAsync<User?>($"api/user/user/{User.Id}");
+                foreach (var role in @UserExpensiveData.RoleUsers)
+                {
+                    if (role.Role.Id == 1)
+                    {
+                        Label = "User - OK";
+                    }
+
+                    if (role.Role.Id == 2)
+                    {
+                        Label2 = "Administrator - OK";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                exc = ex.Message;
+            }
+        }
+        else
+        {
+            User = null;
+            UserExpensiveData = null;
+            exc = null;
+            Label = default!;
+            Label2 = default!;
+        }
+    }
+
+    private async Task OnSuccessSignIn(bool success)
+    {
+        if(success)
+        {
+            await LoadBaseData();
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnSuccessLogout(bool success)
+    {
+        if(success)
+        {
+            await LoadBaseData();
+            StateHasChanged();
+        }
+    }
+}
