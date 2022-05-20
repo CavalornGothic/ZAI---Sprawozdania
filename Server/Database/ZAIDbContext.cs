@@ -32,19 +32,31 @@ public class ZAIDbContext : DbContext
 
         modelBuilder.Entity<User>().HasData(
                 new User { Id = 1, Login = "user", PasswordHash = BCrypt.Net.BCrypt.HashPassword("user")}
-                , new User { Id = 2, Login = "user2", PasswordHash = BCrypt.Net.BCrypt.HashPassword("user2") }
+                , new User { Id = 2, Login = "arek", PasswordHash = BCrypt.Net.BCrypt.HashPassword("arek") }
                 , new User { Id = 3, Login = "user3", PasswordHash = BCrypt.Net.BCrypt.HashPassword("user3") }
             );
         modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "User"},
-                new Role { Id = 2, Name = "Administrator"}
+                new Role { Id = 2, Name = "Administrator"},
+                new Role { Id = 3, Name = "DataBrowsing" },
+                new Role { Id = 4, Name = "DataEditing" },
+                new Role { Id = 5, Name = "UserEditing" }
             );
 
         modelBuilder.Entity<RoleLinks>().HasData(
                 new RoleLinks { Id = 1, RoleID = 1, UserID = 1},
                 new RoleLinks { Id = 2, RoleID = 2, UserID = 2},
                 new RoleLinks { Id = 3, RoleID = 1, UserID = 3},
-                new RoleLinks { Id = 4, RoleID = 2, UserID = 3}
+                new RoleLinks { Id = 4, RoleID = 2, UserID = 3},
+                // data browsing
+                new RoleLinks { Id = 5, RoleID = 3, UserID = 1 },
+                new RoleLinks { Id = 6, RoleID = 3, UserID = 2 },
+                new RoleLinks { Id = 7, RoleID = 3, UserID = 3 },
+                 // data editing
+                new RoleLinks { Id = 8, RoleID = 4, UserID = 2 },
+                // data editing oraz user editing dla user nr 3
+                new RoleLinks { Id = 9, RoleID = 4, UserID = 3 },
+                new RoleLinks { Id = 10, RoleID = 5, UserID = 3 }
             );
     }
 }

@@ -1,48 +1,161 @@
 ﻿@page "/fetchdata"
 @using ZAI.Shared
-@inject HttpClient Http
+@inject HttpClient _http
+@inject ILocalStorageService _localStorage
 
-<PageTitle>Weather forecast</PageTitle>
+<PageTitle>Kody pocztowe</PageTitle>
 
 <h1>Adresy</h1>
 
-@if (addresses == null)
+@if(User == null)
 {
-    <p><em>Loading...</em></p>
+    <SignIn OnSuccess="OnSuccessSignIn" />
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ZipCode</th>
-                <th>Address</th>
-                <th>City</th>
-                <th>Province</th>
-                <th>District</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var address in addresses)
-            {
+    @if (addresses == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        @if(!UserExpensiveData.RoleUsers.Where(x => x.Role.Id == 3).Any())
+        {
+            <NotAuthorized Title="Brak uprawnień" Message="Nie masz uprawneń do przeglądania tej strony!" />
+        }
+        else
+        {
+            <table class="table">
+            <thead>
                 <tr>
-                    <td>@address.ZipCode</td>
-                    <td>@address.Address</td>
-                    <td>@address.City</td>
-                    <td>@address.Province</td>
-                    <td>@address.District</td>
+                    <th>ZipCode</th>
+                    <th>Address</th>
+                    <th>City</th>
+                    <th>Province</th>
+                    <th>District</th>
+                    @if(UserExpensiveData.RoleUsers.Where(x => x.Role.Id == 4).Any())
+                    {
+                          <th>Actions</th>      
+                    }
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var address in addresses)
+                {
+                    <tr>
+                        <td>@address.ZipCode</td>
+                        <td>@address.Address</td>
+                        <td>@address.City</td>
+                        <td>@address.Province</td>
+                        <td>@address.District</td>
+                        @if(UserExpensiveData.RoleUsers.Where(x => x.Role.Id == 4).Any())
+                        {
+                             <td><button @onclick="@( () => EditAddress(address) )" >Edit</button></td>
+                             <td><button @onclick="@( () => DeleteAddress(address) )" >Delete</button></td>   
+                        }
+                        </tr>
+                }
+            </tbody>
+            </table>
+        }
+    }
+    <Logout OnSuccess="OnSuccessLogout" />
 }
+
+@if(_editForm)
+{
+    <EditAddressWindow Address="_addressToEdit" OnSuccess="EditFormSuccess" OnClose="CloseForm" />
+}
+
 
 @code {
 
     private ICollection<AddressDTO>? addresses;
+    public User? User { get; set; } = null;
+    public User? UserExpensiveData { get; set; } = null;
+    private bool _editForm { get; set; } = false;
+    private AddressDTO? _addressToEdit { get; set; } = null;
 
     protected override async Task OnInitializedAsync()
     {
-        addresses = await Http.GetFromJsonAsync<ICollection<AddressDTO>>("api/address/getall");
+        await LoadAddresses();
+        if(User == null)
+            await LoadBaseData();
+    }
+
+    private async Task EditAddress(AddressDTO address)
+    {
+        _addressToEdit = address;
+        _editForm = true;
+    }
+
+    private async Task EditFormSuccess(AddressDTO address)
+    {
+        var addr = addresses?.Where(x => x.ID == address.ID).First();
+        addr.Address = address.Address;
+        addr.City = address.City;
+        addr.District = address.District;
+        addr.Province = address.Province;
+        addr.ZipCode = address.ZipCode;
+    }
+
+    private async Task CloseForm(bool closed)
+    {
+        if (closed)
+            _editForm = false;
+    }
+
+    private async Task LoadAddresses()
+    {
+        addresses = await _http.GetFromJsonAsync<ICollection<AddressDTO>>("api/address/getall");
+    }
+
+    private async Task DeleteAddress(AddressDTO address )
+    {
+        try
+        {
+            var response = await _http.PostAsync($"api/address/delete/{address.ID}", null);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                addresses?.Remove(address);
+
+            StateHasChanged();
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task LoadBaseData()
+    {
+        string? accessToken = await _localStorage.GetItemAsync<string?>("accessToken");
+        if(!String.IsNullOrEmpty(accessToken))
+        {
+            User = await _http.GetFromJsonAsync<User?>($"api/user/user/token/{accessToken}");
+            UserExpensiveData = await _http.GetFromJsonAsync<User?>($"api/user/user/{User.Id}");
+        }
+        else
+        {
+            User = null;
+            UserExpensiveData = null;
+        }
+    }
+
+    private async Task OnSuccessSignIn(bool success)
+    {
+        if(success)
+        {
+            await LoadBaseData();
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnSuccessLogout(bool success)
+    {
+        if(success)
+        {
+            await LoadBaseData();
+            StateHasChanged();
+        }
     }
 }

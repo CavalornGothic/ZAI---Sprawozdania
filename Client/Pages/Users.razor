@@ -1,0 +1,59 @@
+﻿@page "/users"
+@inject HttpClient _http
+@inject ILocalStorageService _localStorage
+
+@if(User == null)
+{
+    <SignIn OnSuccess="OnSuccessSignIn" />
+}
+else
+{
+    @if(!UserExpensiveData.RoleUsers.Where(x => x.Role.Id == 5).Any())
+    {
+        <NotAuthorized Title="Brak uprawnień" Message="Nie masz uprawneń do przeglądania tej strony!" />
+    }
+    <Logout OnSuccess="OnSuccessLogout" />
+}
+
+
+@code {
+    public User? User { get; set; } = null;
+    public User? UserExpensiveData { get; set; } = null;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBaseData();
+    }
+
+    private async Task LoadBaseData()
+    {
+        string? accessToken = await _localStorage.GetItemAsync<string?>("accessToken");
+        if(!String.IsNullOrEmpty(accessToken))
+        {
+            User = await _http.GetFromJsonAsync<User?>($"api/user/user/token/{accessToken}");
+            UserExpensiveData = await _http.GetFromJsonAsync<User?>($"api/user/user/{User.Id}");
+        }
+        else
+        {
+            User = null;
+            UserExpensiveData = null;
+        }
+    }
+
+    private async Task OnSuccessSignIn(bool success)
+    {
+        if(success)
+        {
+            await LoadBaseData();
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnSuccessLogout(bool success)
+    {
+        if(success)
+        {
+            await LoadBaseData();
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,24 @@
+﻿@inject NavigationManager _nm;
+
+@if(visible)
+{
+    <div class="window" style="position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);display: flex;padding: 25px;background: #767070cd;color: white;flex-direction: column;border-radius: 12px;">
+        <div>@Title</div>
+        <div>@Message</div>
+        <div><button @onclick="Redirect" >Ok</button></div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Title { get; set; }
+    [Parameter]
+    public string Message { get; set; }
+    private bool visible = true;
+
+    private async void Redirect()
+    {
+        visible = false;
+        _nm.NavigateTo("/", true);
+    }
+}

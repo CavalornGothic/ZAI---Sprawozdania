@@ -13,6 +13,7 @@ public class AddressessEntity
     {
         return new AddressDTO
         {
+            ID = address.Id,
             Address = address.Address,
             City = address.City,
             Province = address.Province,

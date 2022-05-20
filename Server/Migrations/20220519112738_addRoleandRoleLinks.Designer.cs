@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ZAI.Server.Database;
 
@@ -10,9 +11,10 @@ using ZAI.Server.Database;
 namespace ZAI.Server.Migrations
 {
     [DbContext(typeof(ZAIDbContext))]
-    partial class ZAIDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220519112738_addRoleandRoleLinks")]
+    partial class addRoleandRoleLinks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.3");

@@ -1,0 +1,64 @@
+﻿@using ZAI.Shared
+@if(Address != null)
+{
+    <div style="position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);display: flex;padding: 25px;background: #767070cd;color: white;flex-direction: column;border-radius: 12px;">
+        <label>ZipCode</label>
+        <input type="text" @bind-value="_zipcode"/>
+        <label>Address</label>
+        <input type="text" @bind-value="_address" />
+        <label>City</label>
+        <input type="text" @bind-value="_city" />
+        <label>Province</label>
+        <input type="text" @bind-value="_province" />
+        <label>District</label>
+        <input type="text" @bind-value="_district" />
+        <button @onclick="AcceptForm" >Zapisz</button>
+        <button @onclick="CloseForm" >Anuluj</button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public EventCallback<bool> OnClose { get; set; }
+    [Parameter]
+    public EventCallback<AddressDTO> OnSuccess { get; set; }
+    [Parameter]
+    public AddressDTO? Address { get; set; }
+
+    private bool visible = true;
+    private string? _zipcode { get; set; }
+    private string? _address { get; set; }
+    private string? _city { get; set; }
+    private string? _province { get; set; }
+    private string? _district { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _zipcode = Address?.ZipCode;
+        _address = Address?.Address;
+        _city = Address?.City;
+        _province = Address?.Province;
+        _district = Address?.District;
+    }
+
+    private async Task CloseForm()
+    {
+        visible = false;
+        await OnClose.InvokeAsync(true);
+    }
+
+    private async Task AcceptForm()
+    {
+        visible = false;
+        await OnSuccess.InvokeAsync(new AddressDTO
+            {
+                Address = _address,
+                City = _city,
+                District = _district,
+                Province = _province,
+                ZipCode = _zipcode,
+                ID = Address.ID
+            });
+        await OnClose.InvokeAsync(true);
+    }
+}

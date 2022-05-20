@@ -24,5 +24,20 @@ public class AddressController : ControllerBase
         }
         return _addressess;
     }
+
+    [HttpPost ,Route("delete/{id}")]
+    public IActionResult Delete(int id)
+    {
+        var adr = _dbContext.Adressess.Where(x => x.Id == id);
+        if(adr.Any())
+        {
+            _dbContext.Adressess.Remove(adr.First());
+            int result = _dbContext.SaveChanges();
+            if (result > 0)
+                return Ok();
+            return BadRequest();
+        }
+        return BadRequest();
+    }
 }
 
